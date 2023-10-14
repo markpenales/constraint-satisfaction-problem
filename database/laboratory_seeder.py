@@ -1,28 +1,43 @@
 from models.laboratory_model import LaboratoryModel
 
 
-laboratories = [
-    "Acad 1 - 103",
-    "Acad 1 - 104",
-    "Room 1",
-    "Room 2",
-    "Room 3",
-    "Room 4",
-    "MAC Lab",
-    "IT Lab 1",
-    "IT Lab 2",
-    "NAS Lab",
-    "CS Lab",
-    "RISE Lab",
-    "ERP Lab",
-    "LIS Lab",
-    "Open Lab",
-    "Field",
-]
+laboratories = {
+    "Acad 1 - 103": None,
+    "Acad 1 - 104": None,
+    "Room 1": None,
+    "Room 2": None,
+    "Room 3": None,
+    "Room 4": None,
+    "MAC Lab": ["Multimedia Systems", "Mobile Technology 1"],
+    "IT Lab 1": [
+        "Data Structures and Algorithms",
+        "Advanced Database Systems",
+        "Information Management 1",
+    ],
+    "IT Lab 2": [
+        "Data Structures and Algorithms",
+        "Advanced Database Systems",
+        "Information Management 1",
+    ],
+    "NAS Lab": [
+        "Networking 1",
+        "Networking 2",
+    ],
+    "CS Lab": ["Digital Forensics 1", "Introduction to Computing"],
+    "RISE Lab": ["Introduction to Artificial Intelligence", "Operating System"],
+    "ERP Lab": None,
+    "LIS Lab": [
+        "Introduction to Library and Information Science",
+        "Database Design for Libraries",
+        "Preservation of Information Resources",
+    ],
+    "Open Lab": None,
+    "Field": None,
+}
 
 
 def seed():
     if len(LaboratoryModel().all()) == 0:
-        for lab in laboratories:
-            LaboratoryModel().insert_laboratory(lab)
+        for lab, courses in laboratories.items():
+            LaboratoryModel().insert_laboratory(lab, f"[{courses.split(', ')}]")
         LaboratoryModel().commit_and_close()

@@ -27,14 +27,18 @@ class ScheduleModel(SQLiteDatabase):
         }
         self.insert_data(self.table, data)
 
-    def all(self):
-        return self.select_data(self.table)
+    def all(self, columns=None):
+        return self.select_data(self.table, columns=columns)
 
-    def get_schedule_by_section(self, section):
-        return self.select_data(self.table, condition=f"section_id='{section}'")
+    def get_schedule_by_section(self, section, columns=None):
+        return self.select_data(
+            self.table, condition=f"section_id='{section}'", columns=columns
+        )
 
-    def get_schedule_by_laboratory(self, laboratory):
-        return self.select_data(self.table, condition=f"laboratory_id='{laboratory}'")
+    def get_schedule_by_laboratory(self, laboratory, columns=None):
+        return self.select_data(
+            self.table, condition=f"laboratory_id='{laboratory}'", columns=columns
+        )
 
     def truncate(self):
         query = f"DELETE FROM {self.table}"

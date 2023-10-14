@@ -12,15 +12,34 @@ from database.section_seeder import seed as section_seeder
 from models.schedule_model import ScheduleModel
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    # ScheduleModel().insert_schedule(
+    #     "BSIT 3D",
+    #     "Networking 1",
+    #     "1",
+    #     "Ray T. Cortez",
+    #     "Acad 1 - 103",
+    #     "Monday 12:00 pm",
+    #     "Monday 2:00 pm",
+    # )
     db.create_table()
-    # selection = SelectionGUI(root)
-    root.geometry("1500x850")
 
-    selection = CalendarGUI(root)
     seed()
     instructor_seeder()
     lab_seeder()
     section_seeder()
+    SchedulingProblem(
+        1,
+        "BSIT",
+        "Networking 1",
+        "BSIT 1D",
+        # laboratory="Room 1",
+        # time="Monday 10:00 am",
+    ).solve()
 
-    root.mainloop()
+    # root = tk.Tk()
+    # # selection = SelectionGUI(root)
+    # root.geometry("1500x850")
+
+    # selection = CalendarGUI(root)
+
+    # root.mainloop()

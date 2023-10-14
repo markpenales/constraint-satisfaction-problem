@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from app.selection import SelectionGUI
+from models.schedule_model import ScheduleModel
 from models.section_model import SectionModel
 
 
@@ -56,7 +57,7 @@ class CalendarGUI:
         )
         self.dropdown_section_top.grid(row=0, column=len(self.days_of_week) + 3)
         self.dropdown_section_top.set(
-            self.section_options_top[0]
+            self.section_options_top[12]
         )  # Set default selection
 
         # Row heights for time slots
@@ -95,11 +96,13 @@ class CalendarGUI:
             [None for _ in range(len(self.days_of_week))]
             for _ in range(len(self.time_slots))
         ]
-        for i in range(len(self.time_slots)):
-            for j in range(len(self.days_of_week)):
-                entry = ttk.Entry(root, justify="center", font=("Helvetica", 10))
-                entry.grid(row=i + 1, column=j + 1, ipadx=10, ipady=20, sticky="nsew")
-                self.entries[i][j] = entry
+        # for i in range(len(self.time_slots)):
+        #     for j in range(len(self.days_of_week)):
+
+        # 7 Monday
+        entry_7 = ttk.Entry(root, justify="center", font=("Helvetica", 10))
+        entry_7.grid(row=1, column=1, ipadx=10, ipady=20, sticky="nsew")
+        self.entries[1][1] = entry_7.insert(0, "7:00")
 
         # Adjust row heights
         for i, height in enumerate(self.row_heights):
@@ -114,6 +117,18 @@ class CalendarGUI:
             column=0,
             columnspan=len(self.days_of_week) + 1,
         )
+
+        # Event handler for section dropdown
+        self.dropdown_section_top.bind("<<ComboboxSelected>>", self.on_section_select)
+
+        # Store the selected section
+        self.selected_section = None
+
+    def on_section_select(self, event):
+        self.selected_section = self.dropdown_section_top.get()
+        sectionArr = self.selected_section.split(" ")
+        section = sectionArr[0] + " " + sectionArr[1] + sectionArr[2]
+        self.schedules = ScheduleModel().get_schedule_by_section(section)
 
     def show_selection_gui(self):
         selection_root = tk.Toplevel(self.root)

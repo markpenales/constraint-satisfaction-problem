@@ -17,6 +17,7 @@ tables = {
     "laboratory_table": {
         "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
         "name": "TEXT",
+        "courses": "INTEGER",
     },
     "instructor_table": {
         "id": "INTEGER PRIMARY KEY AUTOINCREMENT",

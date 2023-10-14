@@ -3,6 +3,8 @@ from models.laboratory_model import LaboratoryModel
 
 from models.schedule_model import ScheduleModel
 
+from datetime import datetime
+
 
 class SchedulingProblem:
     def __init__(
@@ -11,18 +13,23 @@ class SchedulingProblem:
         program,
         course,
         section,
-        instructor,
-        laboratory,
-        time,
+        instructor=None,
+        laboratory=None,
+        time=None,
+        day=None,
     ):
-        self.problem = Problem()
+        self.problem = Problem(BacktrackingSolver())
         self.year = year
         self.program = program
         self.course = course
         self.section = section
-        self.instructor = instructor
+
+        # These constraints are hard constraints if they are defined
         self.laboratory = laboratory
         self.time = time
+        self.day = day
+        self.instructor = instructor
+
         self.timeslots = [
             "Monday 7:00 am",
             "Monday 8:00 am",
@@ -107,53 +114,53 @@ class SchedulingProblem:
     def solve(self):
         schedule_model = ScheduleModel()
         lab_model = LaboratoryModel()
-        section_schedules = schedule_model.get_schedule_by_section(self.section)
-        for schedule in section_schedules:
-            if self.course == schedule[2]:
-                return "Schedule was already set for this section. Please find another course"
+
         labs = [laboratory[1] for laboratory in lab_model.all()]
+
         self.problem.addVariable("laboratory", labs)
-        self.problem.addVariable("time", self.timeslots)
+        self.problem.addVariable("timeslot", self.timeslots)
 
-        # Add constraints
-        self.problem.addConstraint(
-            self.laboratory_and_time_constraint, ("laboratory", "time")
-        )
-        # self.problem.addConstraint(self.section_time_constraint, "time")
+        self.problem.addConstraint(self.laboratory_constraint, ["laboratory"])
+        self.problem.addConstraint(self.time_constraint, ["timeslot"])
 
-        # Solve the problem
         solutions = self.problem.getSolutions()
-        print("Solutions: ")
-        # Print solutions
+
+        for solution in solutions:
+            print(solution)
         return solutions
 
-    def laboratory_and_time_constraint(self, laboratory, time):
-        schedule_model = ScheduleModel()
-        existing_schedules = schedule_model.get_schedule_by_laboratory(laboratory)
+    def laboratory_constraint(self, laboratory):
+        if self.laboratory is None:
+            return True
+        return self.laboratory == laboratory
 
-        slots = self.timeslots.copy()
-        for schedule in existing_schedules:
-            try:
-                end_index = slots.index(schedule[7])
-                start_index = slots.index(schedule[6])
-                slots = slots[end_index:]
-            except ValueError:
-                continue
-
-        existing_schedules_section = schedule_model.get_schedule_by_section(
-            self.section
+    def time_constraint(self, timeslot):
+        schedules = ScheduleModel().all(
+            columns=[
+                "day_id",
+                "time_start",
+                "time_end",
+            ]
         )
+        time = self.get_time(timeslot)
 
-        for schedule in existing_schedules_section:
-            try:
-                end_index = slots.index(schedule[7])
-                start_index = slots.index(schedule[6])
-                slots = slots[end_index:]
-            except ValueError:
-                continue
-        if self.laboratory == "" and time in slots:
-            return True
-        if time in slots and laboratory == self.laboratory:
-            return True
+        for schedule in schedules:
+            start = self.get_time(schedule[1])
+            end = self.get_time(schedule[2])
+            if (
+                time >= start
+                and time < end
+                and timeslot.split(" ")[0] == schedule[1].split(" ")[0]
+            ):
+                return False
 
-        return False
+        return True
+
+    def get_time(self, time):
+        time_format = "%I:%M %p"
+        time_arr = time.split(" ")
+        time_arr.pop(0)
+        time = " ".join(time_arr)
+        value = datetime.strptime(time, time_format).time()
+
+        return value
